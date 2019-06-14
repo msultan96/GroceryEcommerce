@@ -1,0 +1,165 @@
+<body class="bg-light">
+<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
+  <div>
+    <h1 class="display-4 mb-3 col-md-12">
+      Let's get you added . . .
+    </h1>
+    <form #form="ngForm" (ngSubmit)="submitSignUpForm()">
+      <div class = "form-row">
+        <div class = "form-group col-md-6 mb-3">
+          <input type = "email"
+                 class = "form-control"
+                 placeholder="Email Address"
+                 name="email"
+                 #email="ngModel"
+                 [(ngModel)]="registerModel.email"
+                 pattern="^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
+                 required>
+        </div>
+        <div class = "form-group col-md-6">
+          <input type = "text"
+                 class = "form-control"
+                 placeholder="User Name"
+                 name="userName"
+                 #userName="ngModel"
+                 [(ngModel)]="registerModel.userName"
+                 pattern="^(?=.{2,}$)(?!.*[.]{2})[a-zA-Z0-9._]+(?<![.])$"
+                 required>
+        </div>
+      </div>
+      <div class = "form-row">
+        <div class = "form-group col-md-6 mb-3">
+          <input type = "password"
+                 class = "form-control"
+                 placeholder="Password"
+                 name="password"
+                 #password="ngModel"
+                 [(ngModel)]="registerModel.password"
+                 pattern="(?=^.{6,}$)((?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z]))^.*"
+                 required>
+        </div>
+        <div class = "form-group col-md-6">
+          <input type = "password"
+                 class = "form-control"
+                 placeholder="Confirm Password"
+                 name="confirmPassword"
+                 #confirmPassword="ngModel"
+                 [(ngModel)]="registerModel.confirmPassword"
+                 pattern="{{ password.value }}"
+                 required>
+        </div>
+      </div>
+      <div class = "form-row">
+        <div class = "form-group col-md-6 mb-3">
+          <input type = "text"
+                 class = "form-control"
+                 placeholder="First Name"
+                 name="firstName"
+                 #firstName="ngModel"
+                 pattern="^^[\S\w'\-,.][^\s0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"
+                 [(ngModel)]="registerModel.firstName"
+                 required>
+        </div>
+        <div class = "form-group col-md-6">
+          <input type = "text"
+                 class = "form-control"
+                 placeholder="Last Name"
+                 name="lastName"
+                 #lastName="ngModel"
+                 pattern="^[\S\w'\-,.][^\s0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"
+                 [(ngModel)]="registerModel.lastName"
+                 required>
+        </div>
+      </div>
+      <div class = "form-row mb-3">
+        <button [disabled]="!firstName" class="btn btn-primary btn-block">
+          Register</button>
+      </div>
+    </form>
+    <div class="w-100 d-flex flex-row justify-content-end">
+      <span class="align-middle lead">Here by mistake?</span>
+      <a class="btn btn-outline-primary btn-sm m-1"  routerLink="/login">
+        Head Back!
+      </a>
+    </div>
+    <div class="w-100 d-flex flex-column justify-content-end mt-5">
+      <!-- Email Validation -->
+      <div *ngIf="email.invalid && form.submitted" class="alert alert-danger">
+        <div *ngIf="email.errors.required">
+          We're going to need an email address on file
+        </div>
+        <div *ngIf="email.errors.pattern">
+          It doesn't seem like that email address is reachable
+        </div>
+      </div>
+      <!-- UserName Validation -->
+      <div *ngIf="userName.invalid && form.submitted" class="alert alert-danger">
+        <div *ngIf="userName.errors.required">
+          We're going to need a username for you to login with
+        </div>
+        <div *ngIf="userName.errors.pattern">
+          Username must meet these requirements:<br>
+          <ul>
+            <li>At least 2 characters long</li>
+            <li>At most 20 characters long</li>
+            <li>Should not start with, end with, or have consecutive periods</li>
+            <li>Should not contain spaces</li>
+            <li>Should only contain alphanumeric characters</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Email Taken -->
+      <div *ngIf="emailTaken" class="alert alert-danger">
+        The email you entered is already in use
+      </div>
+      <!-- UserName Taken -->
+      <div *ngIf="userNameTaken" class="alert alert-danger">
+        The username you entered is already in use
+      </div>
+      <!-- Password Validation -->
+      <div *ngIf="password.invalid && form.submitted" class = "alert alert-danger">
+        <div *ngIf="password.errors.required">
+          You're going to need a password
+        </div>
+        <div *ngIf="password.errors.pattern">
+          Passwords must meet these requirements:<br>
+          <ul>
+            <li>At least 6 characters long</li>
+            <li>One lowercase character</li>
+            <li>One uppercase character</li>
+            <li>One number</li>
+            <li>One special character</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Confirm Password Validation -->
+      <div *ngIf="!password.invalid && confirmPassword.invalid && form.submitted" class="alert alert-danger">
+        <div *ngIf="confirmPassword.errors.required">
+          You haven't confirmed your password yet
+        </div>
+        <div *ngIf="confirmPassword.errors.pattern">
+          Your passwords do not match
+        </div>
+      </div>
+      <!-- First Name Validation -->
+      <div *ngIf="firstName.invalid && form.submitted" class = "alert alert-danger">
+        <div *ngIf="firstName.errors.required">
+          We're going to need your first name
+        </div>
+        <div *ngIf="firstName.errors.pattern">
+          We can't process special characters and spaces in first names just yet
+        </div>
+      </div>
+      <!-- Last Name Validation -->
+      <div *ngIf="lastName.invalid && form.submitted" class = "alert alert-danger">
+        <div *ngIf="lastName.errors.required">
+          We're going to need your last name
+        </div>
+        <div *ngIf="lastName.errors.pattern">
+          We can't process special characters and spaces in last names just yet
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
