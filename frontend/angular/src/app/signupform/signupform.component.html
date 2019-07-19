@@ -20,9 +20,9 @@
           <input type = "text"
                  class = "form-control"
                  placeholder="User Name"
-                 name="userName"
-                 #userName="ngModel"
-                 [(ngModel)]="registerModel.userName"
+                 name="username"
+                 #username="ngModel"
+                 [(ngModel)]="registerModel.username"
                  pattern="^(?=.{2,}$)(?!.*[.]{2})[a-zA-Z0-9._]+(?<![.])$"
                  required>
         </div>
@@ -73,7 +73,8 @@
       </div>
       <div class = "form-row mb-3">
         <button [disabled]="!firstName" class="btn btn-primary btn-block">
-          Register</button>
+          Register
+        </button>
       </div>
     </form>
     <div class="w-100 d-flex flex-row justify-content-end">
@@ -93,11 +94,11 @@
         </div>
       </div>
       <!-- UserName Validation -->
-      <div *ngIf="userName.invalid && form.submitted" class="alert alert-danger">
-        <div *ngIf="userName.errors.required">
+      <div *ngIf="username.invalid && form.submitted" class="alert alert-danger">
+        <div *ngIf="username.errors.required">
           We're going to need a username for you to login with
         </div>
-        <div *ngIf="userName.errors.pattern">
+        <div *ngIf="username.errors.pattern">
           Username must meet these requirements:<br>
           <ul>
             <li>At least 2 characters long</li>
@@ -113,7 +114,7 @@
         The email you entered is already in use
       </div>
       <!-- UserName Taken -->
-      <div *ngIf="userNameTaken" class="alert alert-danger">
+      <div *ngIf="usernameTaken" class="alert alert-danger">
         The username you entered is already in use
       </div>
       <!-- Password Validation -->

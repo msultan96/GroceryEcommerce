@@ -1,10 +1,14 @@
 <body class="bg-light">
-<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
-  <div>
-    <div *ngIf="newRegister"
-         class="w-100 alert alert-success">
-      Your registration was successful!
+<div *ngIf="!this.auth.isUserLoggedIn()"
+     class="min-vh-100 d-flex flex-column justify-content-center align-items-center">
+  <!-- Messages to user i.e. Successful Registration, Invalid Password, etc. -->
+  <div class="w-100 d-flex flex-column justify-content-center align-items-center">
+    <div *ngIf="message" class="{{message.class}}">
+      {{message.message}}
     </div>
+  </div>
+  <!-- Main Login -->
+  <div class="jumbotron">
     <div>
       <h1 class="display-4 text-center">
         Welcome
@@ -15,8 +19,8 @@
                  class="form-control"
                  placeholder="Username"
                  name="username"
-                 #userName="ngModel"
-                 [(ngModel)] = "loginModel.userName"
+                 #username="ngModel"
+                 [(ngModel)] = "loginModel.username"
                  required>
         </div>
         <div class="form-group col-md-6">
@@ -37,14 +41,6 @@
         <a class="btn btn-outline-primary btn-sm m-1" routerLink = "/signup">
           Sign Up!
         </a>
-      </div>
-      <div class="w-100 d-flex flex-column justify-content-end mt-5">
-        <div *ngIf="usernameInvalid && form.submitted" class="alert alert-danger">
-          The username you entered is not currently registered
-        </div>
-        <div *ngIf="passwordInvalid && form.submitted" class="alert alert-danger">
-          Incorrect password
-        </div>
       </div>
     </div>
   </div>

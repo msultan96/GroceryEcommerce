@@ -4,14 +4,17 @@ import com.msultan.spring.model.User;
 import com.msultan.spring.response.UserLoginResponse;
 import com.msultan.spring.response.UserRegistrationResponse;
 import com.msultan.spring.service.UserService;
+import com.msultan.spring.util.GetCartUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/users")
+@RequestMapping(value = "/user")
 public class UserController {
 
 	private UserService userService;
@@ -21,46 +24,33 @@ public class UserController {
 		this.userService = userService;
 	}
 
-	// Shouldn't be utilizing GET requests to retrieve Users
-	/*
 
-	@GetMapping(value="/")
-	public List<User> getAllUsers(){
-		return userService.findAll();
-	}
-
-	@GetMapping(value="/id/{id}")
-	public Optional<User> getUserById(@PathVariable("id") String id) {
-		return Optional.of(userService.findById(id).get());
-	}
-
-	@GetMapping(value="/email/{email:.+}")
-	public Optional<User> getUserByEmail(@PathVariable("email") String email) {
-		return Optional.of(userService.findByEmail(email).get());
-	}
-
-	@GetMapping(value="/username/{userName}")
-	public Optional<User> getUserByUserName(@PathVariable("userName") String userName) {
-		return Optional.of(userService.findByUserName(userName).get());
-	}
-
-	*/
-
-	@PostMapping(value="/login")
-	public UserLoginResponse getUserByUserNameAndPassword(@RequestBody User user){
+	@PostMapping(value="/login", produces = "application/json")
+	public UserLoginResponse getUserByUserNameAndPassword(@RequestHeader(value="Authorization") String auth,
+	                                                      @RequestBody User user){
 		return userService.verify(user);
 	}
 
-	@PutMapping(value="/")
+	@PutMapping(value="/", produces = "application/json")
 	public UserRegistrationResponse createUser(@Valid @RequestBody User user) {
+
 		return userService.save(user);
 	}
 
-	// Shouldn't allow access to delete users
-	/*
-	@DeleteMapping(value = "/id/{id}")
-	public void deleteUser(@PathVariable String id){
-		userService.deleteById(id);
+	@PostMapping(value="/addToCart", produces = "application/json")
+	public void addToCart(@RequestBody Map<String, String> requestBody) throws IOException {
+		userService.addToCart(requestBody.get("username"), requestBody.get("productUpc"));
 	}
-	*/
+
+	@PostMapping(value="/removeFromCart", produces = "application/json")
+	public void removeFromCart(@RequestBody Map<String, String> requestBody) throws IOException {
+		userService.removeFromCart(requestBody.get("username"), requestBody.get("productUpc"));
+	}
+
+	@PostMapping(value="/getCart")
+	public GetCartUtil getCart(@RequestBody String username){
+		GetCartUtil getCartUtil = new GetCartUtil();
+		getCartUtil.setCart(userService.getCart(username));
+		return getCartUtil;
+	}
 }

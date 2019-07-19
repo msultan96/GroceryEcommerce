@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
-import {LoginModel} from "../login-model";
-import {UserModel} from "../user-model";
+import {LoginModel} from "../model/login-model";
+import {UserModel} from "../model/user-model";
+import {AuthService} from "../service/auth.service";
 
 @Component({
 	selector: 'app-login',
@@ -10,84 +11,84 @@ import {UserModel} from "../user-model";
 	styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public newRegister: boolean;
-	public usernameInvalid:boolean;
-	public passwordInvalid:boolean;
+
+	usernameInvalid:boolean;
+	passwordInvalid:boolean;
 
 	loginModel: LoginModel = {
-		userName: '',
+		username: '',
 		password: '',
 	};
 
-	userModel: UserModel ={
-		userName:'',
-		email:'',
-		firstName:'',
-		lastName:''
-	};
+	message = {
+	  message:"",
+    class:"",
+  };
 
-	constructor(private httpClient: HttpClient, private router: Router) {
+	constructor(
+	  private httpClient: HttpClient,
+    private router: Router,
+    private auth:AuthService
+  ) {
 		const navigation = this.router.getCurrentNavigation();
 		const state = navigation.extras.state as {
-			newRegister: boolean
+			message : {
+			  msg:string,
+        class:string
+    }
 		};
 		if(state) {
-			console.log(state.newRegister);
-			this.newRegister = true;
+			if(state.message){
+			  this.message.message=state.message.msg;
+			  this.message.class=state.message.class;
+      }
 		}
 	}
 
 	ngOnInit() {
+	  if(this.auth.isUserLoggedIn()){
+	    this.router.navigate(['index']);
+    }
 	}
 
 	submitLogin() {
-		let backend = "http://localhost:8080/users/login/";
 		let loginUser = this.loginModel;
-		let successUser = this.userModel;
-		if(!loginUser.userName || !loginUser.password) return;
-		this.httpClient.post(backend, this.loginModel, {observe: 'response'}).subscribe(
-			response => {
-
-				let userLoginResponse = response.body["userLoginResponse"];
-				let usernameExists = response.body["usernameExists"];
-				let passwordValid = response.body["passwordValid"];
-				let username = response.body["username"];
-				let email = response.body["email"];
-				let firstName = response.body["firstName"];
-				let lastName = response.body["lastName"];
-
-				if(usernameExists && !passwordValid){
-					this.usernameInvalid=false;
-					this.passwordInvalid=true;
-				}
-				if(!usernameExists){
-					this.usernameInvalid=true;
-					this.passwordInvalid=false;
-				}
-				if(userLoginResponse){
-					this.usernameInvalid=false;
-					this.passwordInvalid=false;
-					successUser.userName=username;
-					successUser.email=email;
-					successUser.firstName=firstName;
-					successUser.lastName=lastName;
-          this.router.navigate(['index'],{state:{successUser}});
-          loginUser=null;
-          successUser=null;
-
-				}
-			},
-			error => {
-				alert("There seems to be an issue. Please try again.");
-				if (error.error instanceof ErrorEvent) {
-				} else {
-					console.error(`An error occurred: ${error.error.message}`);
-					console.error(`Backend returned error code: ${error.status} ` +
-						`body was: ${error.body}`);
-				}
-				return;
-			}
-		);
+		if(!loginUser.username || !loginUser.password) return;
+    this.auth.authenticate(this.loginModel).subscribe(
+      response => {
+        let userLoginResponse = response.body["userLoginResponse"];
+        let usernameExists = response.body["usernameExists"];
+        let passwordValid = response.body["passwordValid"];
+        let username = response.body["username"];
+        let email = response.body["email"];
+        let firstName = response.body["firstName"];
+        let lastName = response.body["lastName"];
+        let cart = response.body["cart"];
+        if(usernameExists && !passwordValid){
+          this.message.message="The password you entered was incorrect";
+          this.message.class="alert alert-danger";
+          return;
+        }
+        if(!usernameExists){
+          this.message.message="The username you entered does not exist";
+          this.message.class="alert alert-danger";
+          return;
+        }
+        if(userLoginResponse){
+          this.usernameInvalid=false;
+          this.passwordInvalid=false;
+          sessionStorage.setItem("username",username);
+          sessionStorage.setItem("email",email);
+          sessionStorage.setItem("firstName",firstName);
+          sessionStorage.setItem("lastName",lastName);
+          sessionStorage.setItem("cart",JSON.stringify(cart));
+          this.router.navigate(['index']);
+        }
+      },
+      error => {
+        this.auth.error(error);
+      }
+    );
 	}
 
 }

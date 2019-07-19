@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {RegistrationResponse, User} from "../service/httpclient.service";
-import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
-import {RegisterModel} from "../register-model";
+import {RegisterModel} from "../model/register-model";
+import {AuthService} from "../service/auth.service";
+import {HttpclientService} from "../service/httpclient.service";
+import {ProductModel} from "../model/product-model";
 
 @Component({
   selector: 'app-signupform',
@@ -13,54 +14,62 @@ import {RegisterModel} from "../register-model";
 export class SignupformComponent implements OnInit {
 
   registerModel:RegisterModel = {
-    userName:'',
+    username:'',
     password:'',
     confirmPassword:'',
     email:'',
     firstName:'',
-    lastName:''
+    lastName:'',
+    cart: new Map<string, number>()
   };
+
   public emailTaken:boolean;
-  public userNameTaken:boolean;
+  public usernameTaken:boolean;
 
 
-  constructor(private httpClient:HttpClient, public router: Router) {
+  constructor(
+    public router: Router,
+    public auth: AuthService,
+    public httpService: HttpclientService
+  ) {
   }
 
   ngOnInit() {
+    if(this.auth.isUserLoggedIn())
+      this.router.navigate(['index']);
   }
 
   submitSignUpForm() {
     this.emailTaken=false;
-    this.userNameTaken=false;
-    let backend = "http://localhost:8080/users/";
+    this.usernameTaken=false;
     let user = this.registerModel;
-    if(!user.email || !user.userName || !user.password || !user.confirmPassword || !user.firstName || !user.lastName) return;
-    this.httpClient.put(backend, this.registerModel, {observe: 'response'}).subscribe(
+    if(!user.email || !user.username || !user.password || !user.confirmPassword || !user.firstName || !user.lastName) return;
+    console.log("USER: " + user);
+    console.log("CART: " + user.cart);
+    this.auth.createUser(user).subscribe(
       response => {
-        var registrationResponse = response.body["registrationResponse"];
-        var emailTaken = response.body["emailTaken"];
-        var userNameTaken = response.body["userNameTaken"];
+        const registrationResponse = response.body["registrationResponse"];
+        const emailTaken = response.body["emailTaken"];
+        const usernameTaken = response.body["usernameTaken"];
         if(emailTaken){
           this.emailTaken=true;
         }
-        if(userNameTaken){
-          this.userNameTaken=true;
+        if(usernameTaken){
+          this.usernameTaken=true;
         }
         if(registrationResponse){
-          this.router.navigate(['login'],{state:{newRegister: true}});
+          this.router.navigate(
+            ['login'],
+            {state:{
+                message:{
+                  msg:"You have been successfully registered",
+                  class:"alert alert-success"
+                }}});
           this.registerModel=null;
         }
       },
       error => {
-        alert("There seems to be an issue. Please try again.");
-        if (error.error instanceof ErrorEvent) {
-          console.error(`An error occurred: ${error.error.message}`);
-        } else {
-          console.error(`Backend returned error code: ${error.status} ` +
-            `body was: ${error.body}`);
-        }
-        return;
+        this.auth.error(error);
       }
     );
   }

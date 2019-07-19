@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {UserModel} from "../user-model";
 import {Router} from "@angular/router";
+import {HttpClient} from "@angular/common/http";
+import {AuthService} from "../service/auth.service";
 
 @Component({
   selector: 'app-index',
@@ -9,28 +10,45 @@ import {Router} from "@angular/router";
 })
 export class IndexComponent implements OnInit {
 
-  user: UserModel = {
-    userName:'',
-    email:'',
-    firstName:'',
-    lastName:''
-  };
+  products = [];
+  private backend = "http://localhost:8080";
 
-  constructor(private router:Router) {
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation.extras.state as {
-      successUser:UserModel
-    };
-    if(state) {
-      this.user = state.successUser;
-    }
-    else{
-      this.router.navigate(['login']);
-    }
-
-  }
+  constructor(
+    private httpClient:HttpClient,
+    private router:Router,
+    private auth:AuthService
+  ) {}
 
   ngOnInit() {
+    if(this.auth.isUserLoggedIn()) this.populateProducts();
+    else this.auth.redirectHome();
+  }
+
+  private populateProducts() {
+    this.httpClient.get(this.backend+"/product/findAll", {observe: 'response'}).subscribe(
+      response =>  {
+        for(let product in response.body){
+          this.products[product]=response.body[product];
+        }
+      },
+      error => {
+        this.auth.error(error);
+      }
+    )
+  }
+
+  private addToCart(product){
+    const username = this.auth.getUsername();
+    const productUpc = product["upc"];
+    console.log(product["upc"]);
+    this.httpClient.post(this.backend+"/user/addToCart",{username, productUpc} , {observe: 'response'}).subscribe(
+      response => {
+        console.log(response.body);
+      },
+      error =>{
+        this.auth.error(error);
+      }
+    )
   }
 
 }

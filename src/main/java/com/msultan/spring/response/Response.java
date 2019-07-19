@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UserRegistrationResponse {
+public class Response {
 
-	private boolean registrationResponse;
-	private boolean emailTaken;
-	private boolean usernameTaken;
+	private boolean response;
+	private String message;
 
 }

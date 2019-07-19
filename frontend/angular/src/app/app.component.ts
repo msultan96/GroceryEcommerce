@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterOutlet} from "@angular/router";
+import {Router, RouterOutlet} from "@angular/router";
 import {slider} from './route-animations';
+import {HttpClient} from "@angular/common/http";
+import {AppService} from "./app.service";
+import {finalize} from "rxjs/operators";
 
 @Component({
   selector: 'app-root',
@@ -11,7 +14,22 @@ import {slider} from './route-animations';
   ]
 })
 export class AppComponent {
+
   title = 'Spring Angular Project';
+  constructor(
+    private app: AppService,
+    private httpClient: HttpClient,
+    private router: Router
+  ){
+    //this.app.authenticate(undefined,undefined);
+  }
+
+  logout(){
+    this.httpClient.post('/logout',{}).pipe(finalize(() => {
+      this.app.authenticated=false;
+      this.router.navigateByUrl('/login');
+    })).subscribe();
+  }
 
   prepareRoute(outlet: RouterOutlet){
     return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation']
